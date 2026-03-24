@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Database Creator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🗄️ Automated Database Creator</h1>
+            <p>Transform your data files into optimized database schemas</p>
+        </header>
+
+        <main>
+            <!-- Step 1: File Upload -->
+            <section class="step" id="step-1">
+                <div class="step-header">
+                    <span class="step-number">1</span>
+                    <h2>Upload Data File</h2>
+                </div>
+                <div class="step-content">
+                    <div class="upload-area" id="upload-area">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <p>Drag and drop your CSV or Parquet file here</p>
+                        <p class="small">or</p>
+                        <input type="file" id="file-upload" accept=".csv,.parquet" hidden>
+                        <button class="btn btn-secondary" onclick="document.getElementById('file-upload').click()">
+                            Browse Files
+                        </button>
+                    </div>
+                    <div id="file-analysis" class="hidden">
+                        <h3>File Analysis</h3>
+                        <div id="analysis-results"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 2: Database Selection -->
+            <section class="step" id="step-2">
+                <div class="step-header">
+                    <span class="step-number">2</span>
+                    <h2>Select Database System</h2>
+                </div>
+                <div class="step-content">
+                    <div class="database-grid" id="database-grid"></div>
+                    <input type="hidden" id="selected-db">
+                </div>
+            </section>
+
+            <!-- Step 3: Credentials -->
+            <section class="step" id="step-3">
+                <div class="step-header">
+                    <span class="step-number">3</span>
+                    <h2>Database Credentials</h2>
+                </div>
+                <div class="step-content">
+                    <div id="credentials-form"></div>
+                </div>
+            </section>
+
+            <!-- Step 4: LLM Configuration -->
+            <section class="step" id="step-4">
+                <div class="step-header">
+                    <span class="step-number">4</span>
+                    <h2>LLM Configuration</h2>
+                </div>
+                <div class="step-content">
+                    <div class="form-group">
+                        <label for="openrouter-key">OpenRouter API Key</label>
+                        <input type="password" id="openrouter-key" placeholder="Enter your OpenRouter API key">
+                    </div>
+                    <div class="form-group">
+                        <label for="model-select">LLM Model</label>
+                        <input type="text" id="model-select" placeholder="e.g., meta-llama/llama-2-70b-chat" value="meta-llama/llama-2-70b-chat">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 5: Schema Preview -->
+            <section class="step" id="step-5">
+                <div class="step-header">
+                    <span class="step-number">5</span>
+                    <h2>Schema Preview</h2>
+                </div>
+                <div class="step-content">
+                    <button class="btn btn-primary" id="design-schema-btn" onclick="designSchema()">
+                        Design Schema with AI
+                    </button>
+                    <div id="schema-preview" class="hidden">
+                        <h3>Generated Schema</h3>
+                        <pre id="schema-content"></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 6: Deploy -->
+            <section class="step" id="step-6">
+                <div class="step-header">
+                    <span class="step-number">6</span>
+                    <h2>Deploy to Database</h2>
+                </div>
+                <div class="step-content">
+                    <button class="btn btn-success" id="deploy-btn" onclick="deploySchema()">
+                        Deploy Schema
+                    </button>
+                    <div id="deployment-status" class="hidden">
+                        <h3>Deployment Status</h3>
+                        <div id="status-content"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div id="toast" class="toast hidden"></div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
