@@ -46,15 +46,73 @@ class DatabaseConnector:
         """Connect to Snowflake"""
         try:
             import snowflake.connector
+            
+            # Validate required credentials
+            required = ["username", "password", "account"]
+            missing = [k for k in required if k not in self.credentials or not self.credentials[k]]
+            if missing:
+                raise ValueError(f"Missing Snowflake credentials: {', '.join(missing)}")
+            
+            account = self.credentials["account"].strip()
+            
+            # Clean up account identifier - remove URL parts if present
+            if "snowflakecomputing.com" in account:
+                # Extract just the account ID from full URL
+                account = account.split(".")[0]
+                print(f"Cleaned account ID from URL: {account}")
+            
+            # Build connection parameters
+            conn_params = {
+                "user": self.credentials["username"].strip(),
+                "password": self.credentials["password"].strip(),
+                "account": account,
+            }
+            
+            # Add optional parameters
+            if self.credentials.get("warehouse"):
+                conn_params["warehouse"] = self.credentials["warehouse"].strip()
+            if self.credentials.get("database"):
+                conn_params["database"] = self.credentials["database"].strip()
+            if self.credentials.get("schema"):
+                conn_params["schema"] = self.credentials["schema"].strip()
+            if self.credentials.get("role"):
+                conn_params["role"] = self.credentials["role"].strip()
+            
+            print(f"\nSnowflake Connection Parameters:")
+            print(f"  Account: {conn_params['account']}")
+            print(f"  User: {conn_params['user']}")
+            print(f"  Warehouse: {conn_params.get('warehouse', 'Not specified')}")
+            print(f"  Database: {conn_params.get('database', 'Not specified')}")
+            print(f"  Schema: {conn_params.get('schema', 'Not specified')}")
+            
+            print(f"\nAttempting Snowflake connection...")
             self.connection = snowflake.connector.connect(
-                user=self.credentials["username"],
-                password=self.credentials["password"],
-                account=self.credentials["account"],
-                warehouse=self.credentials.get("warehouse"),
-                database=self.credentials.get("database")
+                **conn_params,
+                connect_timeout=10,
+                client_session_keep_alive=False
             )
+            print("✓ Snowflake connection successful!")
+            
         except ImportError:
-            raise ImportError("snowflake-connector-python not installed")
+            raise ImportError(
+                "snowflake-connector-python not installed.\n"
+                "Install with: pip install snowflake-connector-python"
+            )
+        except Exception as e:
+            error_msg = str(e)
+            print(f"\n❌ Snowflake Connection Error:")
+            print(f"  {error_msg}")
+            
+            # Provide helpful hints
+            if "Could not connect" in error_msg or "250001" in error_msg:
+                print("\nTroubleshooting tips:")
+                print("  1. Verify account ID format (should be like: xy12345, not full URL)")
+                print("  2. Check username and password are correct")
+                print("  3. Ensure Snowflake account is active")
+                print("  4. Check network connectivity to Snowflake")
+                print("  5. Verify warehouse exists and is running")
+            
+            raise RuntimeError(f"Snowflake connection failed: {error_msg}")
     
     def _connect_sqlserver(self):
         """Connect to SQL Server"""
@@ -102,6 +160,8 @@ class DatabaseConnector:
         try:
             if self.db_type == "athena":
                 self._execute_athena_query(query)
+            elif self.db_type == "snowflake":
+                self._execute_snowflake_query(query)
             else:
                 cursor = self.connection.cursor()
                 cursor.execute(query)
@@ -110,7 +170,20 @@ class DatabaseConnector:
             return True
         except Exception as e:
             print(f"Query execution failed: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return False
+    
+    def _execute_snowflake_query(self, query: str):
+        """Execute query on Snowflake"""
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(query)
+            cursor.close()
+            print(f"Query executed successfully on Snowflake")
+        except Exception as e:
+            print(f"Snowflake query execution error: {str(e)}")
+            raise
     
     def _execute_athena_query(self, query: str):
         """Execute query on Athena"""

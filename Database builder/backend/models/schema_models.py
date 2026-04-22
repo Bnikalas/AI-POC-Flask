@@ -32,6 +32,7 @@ class SchemaDesign(BaseModel):
     relationships: List[Relationship] = Field(default_factory=list, description="Relationships between tables")
     normalization_notes: str = Field(..., description="Notes on normalization approach")
     recommendations: List[str] = Field(default_factory=list, description="Recommendations for optimization")
+    sql_statements: List[str] = Field(default_factory=list, description="SQL DDL statements to create tables")
     
     class Config:
         json_schema_extra = {
@@ -48,7 +49,8 @@ class SchemaDesign(BaseModel):
                 ],
                 "relationships": [],
                 "normalization_notes": "Fully normalized to 3NF",
-                "recommendations": ["Add indexes on email column"]
+                "recommendations": ["Add indexes on email column"],
+                "sql_statements": ["CREATE TABLE users (user_id INT PRIMARY KEY, email VARCHAR(255) NOT NULL)"]
             }
         }
 

@@ -38,7 +38,7 @@ class FileProcessor:
             data: List of dictionaries from CSV file
             
         Returns:
-            dict: Analysis results with all required fields
+            dict: Analysis results with columns and datatypes only
         """
         if not data:
             raise ValueError("No data found in file")
@@ -47,32 +47,62 @@ class FileProcessor:
         analysis_columns = []
         
         for col in columns:
-            values = [row.get(col) for row in data if row.get(col)]
-            unique_values = set(values)
-            null_count = len(data) - len(values)
+            # Infer data type from sample values
+            dtype = FileProcessor._infer_dtype(data, col)
             
             col_info = {
                 "name": col,
-                "dtype": "string",
-                "null_count": null_count,
-                "unique_count": len(unique_values),
-                "sample_values": list(unique_values)[:3]
+                "dtype": dtype,
+                "is_pii": False  # Will be set by PII detection
             }
             analysis_columns.append(col_info)
         
         # Detect potential keys
         potential_keys = FileProcessor.detect_potential_keys(data)
         
-        # Return as dictionary (compatible with both old and new code)
+        # Return as dictionary
         analysis = {
-            "row_count": len(data),
             "column_count": len(columns),
             "columns": analysis_columns,
-            "sample_data": data[:5],
             "potential_keys": potential_keys
         }
         
         return analysis
+    
+    @staticmethod
+    def _infer_dtype(data: List[Dict], col: str) -> str:
+        """Infer data type from sample values"""
+        sample_values = [row.get(col) for row in data[:10] if row.get(col)]
+        
+        if not sample_values:
+            return "VARCHAR(255)"
+        
+        # Check if all values are numeric
+        try:
+            for val in sample_values:
+                float(val)
+            # Check if they're integers
+            if all(str(val).isdigit() or '.' not in str(val) for val in sample_values):
+                return "INT"
+            else:
+                return "DECIMAL(10,2)"
+        except (ValueError, TypeError):
+            pass
+        
+        # Check if it's a date
+        date_formats = ['%Y-%m-%d', '%d-%m-%Y', '%m/%d/%Y', '%Y/%m/%d']
+        for fmt in date_formats:
+            try:
+                from datetime import datetime
+                for val in sample_values:
+                    datetime.strptime(str(val), fmt)
+                return "DATE"
+            except:
+                pass
+        
+        # Default to VARCHAR
+        max_len = max(len(str(val)) for val in sample_values)
+        return f"VARCHAR({max(max_len + 10, 255)})"
     
     @staticmethod
     def detect_potential_keys(data: List[Dict]) -> Dict[str, List[str]]:

@@ -9,16 +9,55 @@
 <body>
     <div class="container">
         <header>
-            <h1>🗄️ Automated Database Creator</h1>
-            <p>Transform your data files into optimized database schemas</p>
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+            </div>
+            <h1>Automated Database Creator</h1>
+            <p>AI-powered schema design and deployment</p>
         </header>
 
         <main>
-            <!-- Step 1: File Upload -->
+            <!-- Step 1: LLM Configuration -->
             <section class="step" id="step-1">
                 <div class="step-header">
                     <span class="step-number">1</span>
-                    <h2>Upload Data File</h2>
+                    <div class="step-title">
+                        <h2>LLM Configuration</h2>
+                        <p class="step-desc">Configure AI model for schema design and PII detection</p>
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div class="form-group">
+                        <label for="openrouter-key">
+                            <span class="label-icon">🔑</span>
+                            OpenRouter API Key
+                        </label>
+                        <input type="password" id="openrouter-key" placeholder="sk-or-v1-..." autocomplete="off">
+                        <small>Get your API key from <a href="https://openrouter.ai/" target="_blank">openrouter.ai</a></small>
+                    </div>
+                    <div class="form-group">
+                        <label for="model-select">
+                            <span class="label-icon">🤖</span>
+                            LLM Model
+                        </label>
+                        <input type="text" id="model-select" placeholder="e.g., meta-llama/llama-2-70b-chat">
+                        <small>Choose a model from OpenRouter's catalog</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 2: File Upload -->
+            <section class="step" id="step-2">
+                <div class="step-header">
+                    <span class="step-number">2</span>
+                    <div class="step-title">
+                        <h2>Upload Data Files</h2>
+                        <p class="step-desc">Upload one or more CSV or Parquet files for analysis</p>
+                    </div>
                 </div>
                 <div class="step-content">
                     <div class="upload-area" id="upload-area">
@@ -27,25 +66,41 @@
                             <polyline points="17 8 12 3 7 8"></polyline>
                             <line x1="12" y1="3" x2="12" y2="15"></line>
                         </svg>
-                        <p>Drag and drop your CSV or Parquet file here</p>
-                        <p class="small">or</p>
-                        <input type="file" id="file-upload" accept=".csv,.parquet" hidden>
+                        <p class="upload-text">Drag and drop your files here</p>
+                        <p class="upload-subtext">or</p>
+                        <input type="file" id="file-upload" accept=".csv,.parquet" multiple hidden>
                         <button class="btn btn-secondary" onclick="document.getElementById('file-upload').click()">
+                            <span class="btn-icon">📁</span>
                             Browse Files
                         </button>
+                        <p class="upload-hint">Supports CSV and Parquet files (max 16MB each, multiple files allowed)</p>
                     </div>
-                    <div id="file-analysis" class="hidden">
-                        <h3>File Analysis</h3>
-                        <div id="analysis-results"></div>
+                    
+                    <!-- Uploaded Files List -->
+                    <div id="uploaded-files-list" class="hidden">
+                        <h3>📂 Uploaded Files</h3>
+                        <div class="files-container" id="files-container"></div>
+                    </div>
+                    
+                    <!-- File Analysis Tabs -->
+                    <div id="file-analysis-tabs" class="hidden">
+                        <h3>📊 File Analysis</h3>
+                        <div class="analysis-tabs" id="analysis-tabs"></div>
+                        <div id="file-analysis" class="analysis-content">
+                            <div id="analysis-results"></div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Step 2: Database Selection -->
-            <section class="step" id="step-2">
+            <!-- Step 3: Database Selection -->
+            <section class="step" id="step-3">
                 <div class="step-header">
-                    <span class="step-number">2</span>
-                    <h2>Select Database System</h2>
+                    <span class="step-number">3</span>
+                    <div class="step-title">
+                        <h2>Select Database System</h2>
+                        <p class="step-desc">Choose your target database platform</p>
+                    </div>
                 </div>
                 <div class="step-content">
                     <div class="database-grid" id="database-grid"></div>
@@ -53,49 +108,38 @@
                 </div>
             </section>
 
-            <!-- Step 3: Credentials -->
-            <section class="step" id="step-3">
-                <div class="step-header">
-                    <span class="step-number">3</span>
-                    <h2>Database Credentials</h2>
-                </div>
-                <div class="step-content">
-                    <div id="credentials-form"></div>
-                </div>
-            </section>
-
-            <!-- Step 4: LLM Configuration -->
+            <!-- Step 4: Schema Preview -->
             <section class="step" id="step-4">
                 <div class="step-header">
                     <span class="step-number">4</span>
-                    <h2>LLM Configuration</h2>
+                    <div class="step-title">
+                        <h2>Schema Preview</h2>
+                        <p class="step-desc">AI-generated database schema</p>
+                    </div>
                 </div>
                 <div class="step-content">
-                    <div class="form-group">
-                        <label for="openrouter-key">OpenRouter API Key</label>
-                        <input type="password" id="openrouter-key" placeholder="Enter your OpenRouter API key">
-                    </div>
-                    <div class="form-group">
-                        <label for="model-select">LLM Model</label>
-                        <input type="text" id="model-select" placeholder="e.g., meta-llama/llama-2-70b-chat" value="meta-llama/llama-2-70b-chat">
+                    <button class="btn btn-primary" id="design-schema-btn" onclick="designSchema()">
+                        <span class="btn-icon">✨</span>
+                        Design Schema with AI
+                    </button>
+                    <div id="schema-preview" class="hidden">
+                        <h3>🎯 Generated Schema</h3>
+                        <div id="schema-content"></div>
                     </div>
                 </div>
             </section>
 
-            <!-- Step 5: Schema Preview -->
+            <!-- Step 5: Database Credentials -->
             <section class="step" id="step-5">
                 <div class="step-header">
                     <span class="step-number">5</span>
-                    <h2>Schema Preview</h2>
+                    <div class="step-title">
+                        <h2>Database Credentials</h2>
+                        <p class="step-desc">Enter connection details for your database</p>
+                    </div>
                 </div>
                 <div class="step-content">
-                    <button class="btn btn-primary" id="design-schema-btn" onclick="designSchema()">
-                        Design Schema with AI
-                    </button>
-                    <div id="schema-preview" class="hidden">
-                        <h3>Generated Schema</h3>
-                        <pre id="schema-content"></pre>
-                    </div>
+                    <div id="credentials-form"></div>
                 </div>
             </section>
 
@@ -103,15 +147,98 @@
             <section class="step" id="step-6">
                 <div class="step-header">
                     <span class="step-number">6</span>
-                    <h2>Deploy to Database</h2>
+                    <div class="step-title">
+                        <h2>Deploy to Database</h2>
+                        <p class="step-desc">Execute schema creation on your database</p>
+                    </div>
                 </div>
                 <div class="step-content">
                     <button class="btn btn-success" id="deploy-btn" onclick="deploySchema()">
+                        <span class="btn-icon">🚀</span>
                         Deploy Schema
                     </button>
                     <div id="deployment-status" class="hidden">
-                        <h3>Deployment Status</h3>
+                        <h3>📋 Deployment Status</h3>
                         <div id="status-content"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 7: SQL Execution Logs -->
+            <section class="step" id="step-7">
+                <div class="step-header">
+                    <span class="step-number">7</span>
+                    <div class="step-title">
+                        <h2>SQL Execution Logs</h2>
+                        <p class="step-desc">Detailed execution results for each statement</p>
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div id="execution-logs" class="hidden">
+                        <h3>📝 Execution Results</h3>
+                        <div id="logs-content"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Step 8: SQL Error Correction -->
+            <section class="step" id="step-8">
+                <div class="step-header">
+                    <span class="step-number">8</span>
+                    <div class="step-title">
+                        <h2>SQL Error Correction</h2>
+                        <p class="step-desc">Fix failed statements with AI assistance</p>
+                    </div>
+                </div>
+                <div class="step-content">
+                    <div id="error-correction" class="hidden">
+                        <h3>🔧 Fix Failed SQL Statements</h3>
+                        <p class="step-hint">Copy the error message and SQL from the logs above, then paste them here to get AI-corrected SQL.</p>
+                        
+                        <div class="form-group">
+                            <label for="error-message">
+                                <span class="label-icon">⚠️</span>
+                                Error Message
+                            </label>
+                            <div class="textarea-wrapper">
+                                <textarea id="error-message" placeholder="Paste the error message from the logs above..." rows="4"></textarea>
+                                <button class="btn-copy" onclick="copyToClipboard('error-message')" title="Copy to clipboard">
+                                    <span>📋</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="failed-sql">
+                                <span class="label-icon">💻</span>
+                                Failed SQL Statement
+                            </label>
+                            <div class="textarea-wrapper">
+                                <textarea id="failed-sql" placeholder="Paste the SQL statement that failed..." rows="4"></textarea>
+                                <button class="btn-copy" onclick="copyToClipboard('failed-sql')" title="Copy to clipboard">
+                                    <span>📋</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="fixSQLError()">
+                            <span class="btn-icon">🔄</span>
+                            Get Corrected SQL
+                        </button>
+                        
+                        <div id="corrected-sql-result" class="hidden">
+                            <h4>✅ Corrected SQL</h4>
+                            <div class="textarea-wrapper">
+                                <pre id="corrected-sql-content"></pre>
+                                <button class="btn-copy" onclick="copyToClipboard('corrected-sql-content')" title="Copy to clipboard">
+                                    <span>📋</span>
+                                </button>
+                            </div>
+                            <button class="btn btn-success" onclick="redeployCorrectedSQL()">
+                                <span class="btn-icon">🚀</span>
+                                Redeploy with Corrected SQL
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>

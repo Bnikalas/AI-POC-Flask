@@ -1,5 +1,5 @@
-﻿Student id,Name,age,city
-1,asd,21,nagpur
-2,vbn,22,pune
-3,ghj,23,mumbai
-4,rty,21,pune
+﻿Student id,Name,age,city,email,phone no.,pincode
+1,asd,21,nagpur,asd@gmail.com,1234,440015
+2,vbn,22,pune,vbn_2gmail.com,43645753,410065
+3,ghj,23,mumbai,ghj@ymail.com,34627653987,411007
+4,rty,21,pune,rty_1@gmail.com,8648745,410065
